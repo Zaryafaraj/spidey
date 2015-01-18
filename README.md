@@ -4,7 +4,7 @@ spidey
 
 1. Make sure you have node installed from here : http://nodejs.org/. 
 
-2. Go to the popeye directory and do : ```npm install```
+2. Go to the spidey directory and do : ```npm install```
 
 3. To run the server as a single process do : ```node app.js``` <br>
 	By default the server runs on port 8000, if you want to change the port do : ```node app.js [PORT]`` . In this case the logs are in logs/app.log
