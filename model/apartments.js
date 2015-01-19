@@ -84,7 +84,60 @@ function batchSaveApartments(apartments, finalCallback) {
     async.eachSeries(dynamoUpdateParams, dynamoSave, finalCallback);
 }
 
+function getAllApartments(cityName, callback) {
+    var params = {
+        Key: {
+            city: {
+                S: cityName
+            }
+        },
+        TableName: 'zyp-all-apartments'
+    };
+
+    dynamo.getItem(params, function (err, result) {
+
+        if (err) {
+            callback(err)
+        } else if (!result.Item) {
+            err = {NoItem: true};
+            callback(err);
+        } else {
+            var allApartments = JSON.parse(result.Item.apartments.S);
+            callback(null, allApartments)
+        }
+
+    });
+};
+
+function getApartment(id, callback) {
+
+    var params = {
+        Key: {
+            id: {
+                S: id
+            }
+        },
+        TableName: 'zyp-apartments'
+    };
+
+    dynamo.getItem(params, function (err, result) {
+
+        if (err) {
+            callback(err)
+        } else if (!result.Item) {
+            err = {NoItem: true};
+            callback(err);
+        } else {
+            var apartment = JSON.parse(result.Item.apartment.S);
+            callback(null, apartment)
+        }
+
+    });
+}
+
 module.exports = {
     saveAllApartmentsForCity : saveAllApartmentsForCity,
-    batchSaveApartments: batchSaveApartments
+    batchSaveApartments: batchSaveApartments,
+    getAllApartments: getAllApartments,
+    getApartment: getApartment
 }

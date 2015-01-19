@@ -109,7 +109,6 @@ function crawlCity(cityName, logger) {
                 features: apartment.features,
                 latitude: apartment.latitude,
                 longtitude: apartment.longtitude,
-                url: apartment.link,
                 price: apartment.price,
                 region: apartment.region,
                 street: apartment.street,
@@ -217,7 +216,28 @@ function crawlCity(cityName, logger) {
 
             logger.info('*** -- Successfully got all apartments');
             logger.info('Recording apartment lists into dynamo');
-            apartmentsModel.saveAllApartmentsForCity(results, cityName, function (err) {
+
+            //remove any extra crawl info
+            var cleanResults = results.map(function(elem) {
+                var cleanElem = {
+                    id: elem.id,
+                    title: elem.title,
+                    latitude: elem.latitude,
+                    longitude: elem.longitude,
+                    street: elem.street,
+                    city: elem.city,
+                    region: elem.region,
+                    zip: elem.zipCode,
+                    thumbnail: elem.thumbnail,
+                    floorplan: elem.floorplan,
+                    price: elem.price,
+                    contact: elem.contact,
+                    features: elem.features
+                };
+                return cleanElem;
+            });
+
+            apartmentsModel.saveAllApartmentsForCity(cleanResults, cityName, function (err) {
                 if (err) {
                     logger.error(err, 'Failed to Save All Apartments');
                 } else {
