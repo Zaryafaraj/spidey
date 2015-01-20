@@ -5,6 +5,10 @@
 
 var AWS = require('aws-sdk');
 var async = require('async');
+var cacheManager = require('cache-manager');
+
+//24 hours caching of apartments
+var memoryCache = cacheManager.caching({store: 'memory', max: 100, ttl: 86400/*seconds*/});
 
 AWS.config.region = 'us-west-2'
 var dynamo = new AWS.DynamoDB();
@@ -77,7 +81,7 @@ function batchSaveApartments(apartments, finalCallback) {
         dynamoUpdateParams.push(params);
     }
 
-    var dynamoSave = function(param, callback) {
+    var dynamoSave = function (param, callback) {
         dynamo.batchWriteItem(param, callback);
     };
 
@@ -85,58 +89,69 @@ function batchSaveApartments(apartments, finalCallback) {
 }
 
 function getAllApartments(cityName, callback) {
-    var params = {
-        Key: {
-            city: {
-                S: cityName
-            }
-        },
-        TableName: 'zyp-all-apartments'
-    };
 
-    dynamo.getItem(params, function (err, result) {
+    var cacheKey = 'city_' + cityName;
+    memoryCache.wrap(cacheKey,
+        function (cacheCb) {
 
-        if (err) {
-            callback(err)
-        } else if (!result.Item) {
-            err = {NoItem: true};
-            callback(err);
-        } else {
-            var allApartments = JSON.parse(result.Item.apartments.S);
-            callback(null, allApartments)
-        }
+            var params = {
+                Key: {
+                    city: {
+                        S: cityName
+                    }
+                },
+                TableName: 'zyp-all-apartments'
+            };
 
-    });
+            dynamo.getItem(params, function (err, result) {
+
+                if (err) {
+                    cacheCb(err)
+                } else if (!result.Item) {
+                    err = {NoItem: true};
+                    cacheCb(err);
+                } else {
+                    var allApartments = JSON.parse(result.Item.apartments.S);
+                    cacheCb(null, allApartments)
+                }
+
+            });
+        }, callback);
 };
 
 function getApartment(id, callback) {
 
-    var params = {
-        Key: {
-            id: {
-                S: id
-            }
-        },
-        TableName: 'zyp-apartments'
-    };
+    var cacheKey = 'apartment_' + id;
+    memoryCache.wrap(cacheKey,
+        function (cacheCb) {
+            var params = {
+                Key: {
+                    id: {
+                        S: id
+                    }
+                },
+                TableName: 'zyp-apartments'
+            };
 
-    dynamo.getItem(params, function (err, result) {
+            dynamo.getItem(params, function (err, result) {
 
-        if (err) {
-            callback(err)
-        } else if (!result.Item) {
-            err = {NoItem: true};
-            callback(err);
-        } else {
-            var apartment = JSON.parse(result.Item.apartment.S);
-            callback(null, apartment)
-        }
+                if (err) {
+                    cacheCb(err)
+                } else if (!result.Item) {
+                    err = {NoItem: true};
+                    cacheCb(err);
+                } else {
+                    var apartment = JSON.parse(result.Item.apartment.S);
+                    cacheCb(null, apartment)
+                }
 
-    });
+            });
+        }, callback);
+
 }
 
 module.exports = {
-    saveAllApartmentsForCity : saveAllApartmentsForCity,
+    saveAllApartmentsForCity: saveAllApartmentsForCity,
     batchSaveApartments: batchSaveApartments,
     getAllApartments: getAllApartments,
     getApartment: getApartment
