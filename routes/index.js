@@ -15,6 +15,7 @@ router.get('/healthCheck', function(req, res){
 
 router.get('/version', function(req, res){
     var GIT_VERSION = '__GIT_VERSION__';
+    req.log.info('version');
     res.send(GIT_VERSION);
 });
 
