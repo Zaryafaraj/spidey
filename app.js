@@ -57,7 +57,7 @@ app.use(function (err, req, res, next) {
 //=============================================
 //          Initiate Server
 //=============================================
-app.set('port', process.env.PORT || 8001);
+app.set('port', process.env.PORT_SPIDEY || 8001);
 
 var server;
 function startServer() {
