@@ -13,6 +13,11 @@ router.get('/healthCheck', function(req, res){
     res.status(200).send();
 });
 
+router.get('/version', function(req, res){
+    var GIT_VERSION = '__GIT_VERSION__';
+    res.send(GIT_VERSION);
+});
+
 router.get('/cities', function (req, res) {
     res.send(allCities);
 });
