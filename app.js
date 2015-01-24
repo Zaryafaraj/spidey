@@ -65,7 +65,6 @@ function startServer() {
         debug('Express server listening on port ' + app.get('env') + ' mode on ' + app.get('port'));
     });
 }
-
 //this file is run directly;start a single app server
 if (require.main === module) {
     startServer();
