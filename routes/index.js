@@ -5,6 +5,14 @@ var apartmentsModel = require('../model/apartments')
 
 var allCities = ['seattle', 'redmond', 'bellevue', 'kirkland', 'tacoma', 'olympia'];
 
+router.get('/', function(req, res){
+    res.send('My spidey senses tell me its' + new Date().toString());
+});
+
+router.get('/healthCheck', function(req, res){
+    res.status(200).send();
+});
+
 router.get('/cities', function (req, res) {
     res.send(allCities);
 });
